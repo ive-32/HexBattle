@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using IcwField;
 using IcwUnits;
+using IcwBattle;
 using TMPro;
 
 namespace IcwUI
@@ -11,16 +11,20 @@ namespace IcwUI
         public TextMeshProUGUI textout;
         public TextMeshProUGUI[] info;
         IField field;
+        IBattle battle;
         private IUnit pointedUnit;
-        private IUnit selectedUnit;
         bool IPresenter.NeedUpdate { get; set; } = true;
         IUnit IPresenter.SelectedUnit 
-        { 
-            get => selectedUnit; 
+        {
+            get 
+            {
+                if (battle.SelectedObject is IUnit) return battle.SelectedObject as IUnit;
+                else return null;
+            }
             set 
-            { 
-                (this as IPresenter).NeedUpdate = (this as IPresenter).NeedUpdate || selectedUnit != value;
-                selectedUnit = value;
+            {   
+                (this as IPresenter).NeedUpdate = (this as IPresenter).NeedUpdate || battle.SelectedObject != value;
+                battle.SelectedObject = value;
             } 
         }
         IUnit IPresenter.PointedUnit
@@ -32,17 +36,14 @@ namespace IcwUI
                 pointedUnit = value;
             }
         }
-        //void IPresenter.ShowTurnArea(IcwStepWeigth[,] weights) => field.ShowTurnArea(weights);
-
-        //void IPresenter.ShowRoute(List<Vector2Int> route, IcwStepWeigth[,] weights) => field.ShowRoute(route, weights);
 
         void IPresenter.ShowText(string str)
         {
             string maintext = textout.text;
             string[] res = maintext.Split('\n');
-            if (res.Length>5)
+            if (res.Length>3)
             {
-                maintext = string.Join('\n', res, res.Length - 6, 5);
+                maintext = string.Join('\n', res, res.Length - 3, 3);
             }
             textout.text = maintext + "\n" + str;
         }
@@ -60,15 +61,23 @@ namespace IcwUI
                 (this as IPresenter).ShowText("Field object not founded");
                 Destroy(this.gameObject);
             }
+            this.TryGetComponent<IBattle>(out battle);
+            if (battle == null)
+            {
+                (this as IPresenter).ShowText("Battle object not founded");
+                Destroy(this.gameObject);
+            }
+
         }
         private void Update()
         {
             if (!(this as IPresenter).NeedUpdate) return;
-            if (selectedUnit != null)
+            if ((this as IPresenter).SelectedUnit is IUnit)
             {
-                field.ShowTurnArea(selectedUnit.weights);
-                field.ShowRoute(selectedUnit.Route, selectedUnit.weights);
-                (this as IPresenter).ShowInfo(selectedUnit.GetInfo(), 0);
+                IUnit unit = (this as IPresenter).SelectedUnit;
+                field.ShowTurnArea(unit.weights);
+                field.ShowRoute(unit.Route, unit.weights);
+                (this as IPresenter).ShowInfo(unit.GetInfo(), 0);
             }
             else
             {

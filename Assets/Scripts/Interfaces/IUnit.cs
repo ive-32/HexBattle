@@ -14,26 +14,15 @@ namespace IcwUnits
         IcwStepWeigth[,] weights { get; set; }
         List<Vector2Int> Route { get; set; }
         IcwWeightMapGenerator WeightMapGenerator { get; set; }
-        IcwUnitBaseAttack Attack { get; set; }
+        IcwUnitBaseAttackAbility AttackAbility { get; set; }
         string GetInfo();
         int CostTile(List<IFieldObject> tileObjects);
 
-        int DefaultCost(IFieldObject.ObjType objType)
-        {
-            return objType switch
-            {
-                IFieldObject.ObjType.Empty => IFieldObject.BaseStepCost,
-                IFieldObject.ObjType.Grass => IFieldObject.BaseStepCost,
-                IFieldObject.ObjType.Gravel => IFieldObject.BaseStepCost,
-                IFieldObject.ObjType.Wall => IFieldObject.MaxStepCost,
-                IFieldObject.ObjType.Unit => IFieldObject.MaxStepCost,
-                _ => IFieldObject.BaseStepCost
-            };
-        }
+        int DefaultCost(IcwFieldObjectType objType) => objType.IsMoveObstacle ? IFieldObject.MaxStepCost : IFieldObject.BaseStepCost;
         bool OnSelect();
         void OnMouseMove(Vector2Int pos);
-        void MoveByRoute(Vector2Int pos);
+        bool MoveByRoute(Vector2Int pos);
         void NewTurn();
-        void GetDamage(IcwUnitBaseAttack attack); 
+        Vector2Int? DoAttack(Vector2Int target);
     }
 }

@@ -56,27 +56,31 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\UI\IcwPresenter.cs" />
+    <Compile Include="Assets\Scripts\Field\IcwHexTile.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IBattle.cs" />
-    <Compile Include="Assets\Scripts\IcwField.cs" />
     <Compile Include="Assets\Scripts\Units\IcwTrooperUnit.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IFieldObject.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IUnit.cs" />
     <Compile Include="Assets\Scripts\Units\IcwR2D2Unit.cs" />
-    <Compile Include="Assets\Scripts\IcwUnitStats.cs" />
-    <Compile Include="Assets\Scripts\IcwWeightMapGenerator.cs" />
+    <Compile Include="Assets\Scripts\Units\IcwUnitStats.cs" />
     <Compile Include="Assets\Scripts\IcwAtomFunc.cs" />
-    <Compile Include="Assets\Scripts\IcwBattleFlow.cs" />
-    <Compile Include="Assets\Scripts\IcwBaseUnit.cs" />
+    <Compile Include="Assets\Scripts\BattleFlow\IcwBattleFlow.cs" />
+    <Compile Include="Assets\Scripts\Interfaces\IPresenter.cs" />
+    <Compile Include="Assets\Scripts\Units\IcwBaseUnit.cs" />
+    <Compile Include="Assets\Scripts\Field\IcwField.cs" />
+    <Compile Include="Assets\Scripts\UnitActions\IcwUnitBaseAttackAbility.cs" />
+    <Compile Include="Assets\Scripts\BattleFlow\IcwBattleFieldGenerator.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IField.cs" />
-    <Compile Include="Assets\Scripts\IcwBaseFieldObject.cs" />
+    <Compile Include="Assets\Scripts\IcwGlobalSettings.cs" />
+    <Compile Include="Assets\Scripts\Field\IcwBaseFieldObject.cs" />
     <Compile Include="Assets\Scripts\IcwStepWeigth.cs" />
+    <Compile Include="Assets\Scripts\Field\IcwFieldObjectType.cs" />
+    <Compile Include="Assets\Scripts\Field\IcwWeightMapGenerator.cs" />
     <Compile Include="Assets\Scripts\Units\IcwEvoqueUnit.cs" />
     <Compile Include="Assets\Scripts\Units\IcwSpiderUnit.cs" />
     <Compile Include="Assets\Scripts\UI\IcwUIEvents.cs" />
-    <Compile Include="Assets\Scripts\IcwGlobalSettings.cs" />
-    <Compile Include="Assets\Scripts\UnitActions\IcwUnitBaseAttack.cs" />
-    <Compile Include="Assets\Scripts\Interfaces\IPresenter.cs" />
-    <Compile Include="Assets\Scripts\UI\IcwPresenter.cs" />
+    <Compile Include="Assets\Scripts\Interfaces\IDamageAble.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

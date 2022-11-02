@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 475951512912825221}
-  - component: {fileID: 9218198591163888077}
+  - component: {fileID: 3771729925624754010}
   m_Layer: 0
   m_Name: Evoque
   m_TagString: Untagged
@@ -35,7 +35,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9218198591163888077
+--- !u!114 &3771729925624754010
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,12 +44,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 334565847789459702}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af860b27bb0e44242a4b3e6a3ba10050, type: 3}
+  m_Script: {fileID: 11500000, guid: 0b8f0e116956b9e4c9373e02372e3b97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   teamcolor:
   - {fileID: 0}
   - {fileID: 0}
+  objtype: {fileID: 11400000, guid: 0da359ead8183324fbf5014c9e882c29, type: 2}
+  mainsprite: {fileID: 756143409194552549}
 --- !u!1 &756143409194552549
 GameObject:
   m_ObjectHideFlags: 0

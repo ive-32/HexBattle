@@ -14,10 +14,21 @@ namespace IcwField
         void RemoveObject(IFieldObject obj);
         void AddObject(IFieldObject obj, Vector2Int pos);
         void MoveObject(IFieldObject obj, Vector2Int newpos);
-        //Vector2Int GetObjectPosition(IFieldObject obj);
         bool IsObjectInTile(IFieldObject obj, Vector2Int pos);
+        List<IFieldObject> GetObjectsInTile(Vector2Int pos);
+        int Distance(Vector2Int tile1, Vector2Int tile2);
+        List<Vector2Int> GetAreaInRange(Vector2Int pos, int range);
+        public List<Vector2Int> GetTilesOnLine(Vector2Int startTile, Vector2Int targetTile);
+        bool IsTileVisibleFrom(Vector2Int startTile, Vector2Int targetTile, out List<Vector2Int> visibletiles);
+        Vector2Int? GetFirstObstacleTile(Vector2Int startTile, Vector2Int targetTile);
+        List<Vector2Int> GetVisibleTiles(Vector2Int pos, int range);
+        void ShowCoordTile(bool show);
+        void HideAllInfo();
+
+        // это плохо, перенести в презентер
         void ShowTurnArea(IcwStepWeigth[,] weights);
         void ShowRoute(List<Vector2Int> route, IcwStepWeigth[,] weights);
+        void ShowBorderTile(Vector2Int tile1, int? tiletype);
 
     }
 }

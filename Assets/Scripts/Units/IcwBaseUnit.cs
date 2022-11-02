@@ -6,10 +6,11 @@ using IcwBattle;
 
 namespace IcwUnits
 {
-    class IcwBaseUnit : MonoBehaviour, IUnit //IFieldObject,
+    class IcwBaseUnit : MonoBehaviour, IUnit , IDamageAble//IFieldObject,
     {
+
         // Реализация интерфейса IFieldObject
-        IFieldObject.ObjType IFieldObject.ObjectType { get; set; } = IFieldObject.ObjType.Unit;
+        IcwFieldObjectType IFieldObject.ObjectType{ get; set; }
         IField IFieldObject.Field { get; set; } = null; // Поле на котором юнит находится
         Vector2Int IFieldObject.FieldPosition
         {
@@ -30,11 +31,13 @@ namespace IcwUnits
         IBattle IUnit.battle { get; set; } = null;
         IcwStepWeigth[,] IUnit.weights { get; set; }
         List<Vector2Int> IUnit.Route { get; set; }
-        IcwUnitBaseAttack IUnit.Attack { get; set; } = new IcwUnitBaseAttack();
+        IcwUnitBaseAttackAbility IUnit.AttackAbility { get; set; } = new IcwUnitBaseAttackAbility();
         // реализация интерфейса IUnit
 
         GameObject UnitSprite;
         public Transform[] teamcolor = new Transform[2];
+        public IcwFieldObjectType objtype;
+        protected bool IsBusyByVisual = false;
 
         // визуал, все что с ним связано
         protected virtual void Awake()
@@ -48,7 +51,8 @@ namespace IcwUnits
             (this as IUnit).BaseStats.TurnPoints = Random.Range(15, 20);
             (this as IUnit).BaseStats.Health = Random.Range(90, 115);
             (this as IUnit).CurrentStats.SetStats((this as IUnit).BaseStats);
-            (this as IUnit).Attack.thisUnit = this;
+            (this as IUnit).AttackAbility.thisUnit = this;
+            (this as IUnit).ObjectType = objtype;
         }
 
         protected virtual void Start()
@@ -67,6 +71,7 @@ namespace IcwUnits
         IEnumerator ShowMoveByRoute(Vector2Int pos)
         {
             (this as IUnit).battle.UnitActionStart(this);
+            IsBusyByVisual = true;
             float screenMoveSpeed = 5f; //единиц в секунду
             while ((this as IUnit).Route.Count > 1 && (this as IUnit).FieldPosition != pos)
             {
@@ -103,12 +108,22 @@ namespace IcwUnits
             (this as IUnit).Route = null;
             (this as IUnit).weights = null;
             (this as IUnit).battle.UnitActionComplete(this);
+            IsBusyByVisual = false;
         }
 
-        void ShowDied()
+
+        
+        void ShowDied(Vector3 pos)
         {
+            //Vector3 pos =
+            // костыль жесть, поле отправило юнит нафиг с пляжа и мы его возвращаем обратно
+            this.transform.position = pos;
+            (this as IUnit).battle.Presenter.ShowText($"{this.name} умер");
             UnitSprite.transform.Rotate(60, 0, 90);
             UnitSprite.transform.localPosition = new Vector3(0, -0.3f, 0);
+            UnitSprite.GetComponent<SpriteRenderer>().sortingOrder = 0;
+            teamcolor[0].gameObject.SetActive(false); //GetComponent<SpriteRenderer>().sortingOrder = -1;
+            teamcolor[1].gameObject.SetActive(false); //GetComponent<SpriteRenderer>().sortingOrder = -1;
         }
 
 
@@ -119,7 +134,7 @@ namespace IcwUnits
                 $"Name: {this.name},\n" +
                 $"Health {(this as IUnit).CurrentStats.Health} of {(this as IUnit).BaseStats.Health}\n" +
                 $"TurnPoints {(this as IUnit).CurrentStats.TurnPoints} of {(this as IUnit).BaseStats.TurnPoints}\n" +
-                $"Damage Value {(this as IUnit).Attack.Damage}";
+                $"Damage Value {(this as IUnit).AttackAbility.Damage}";
             return result;
         }
         public virtual int CostTile(List<IFieldObject> tileObjects)
@@ -140,22 +155,24 @@ namespace IcwUnits
 
         bool IUnit.OnSelect()
         {
+            if (IsBusyByVisual) return false;
             if ((this as IUnit).CurrentStats.Health <= 0) return false;
-            if ((this as IUnit).weights == null) GenerateWeights();
-            (this as IFieldObject).Field.ShowTurnArea((this as IUnit).weights);
+            GenerateWeights();
+            //(this as IFieldObject).Field.ShowTurnArea((this as IUnit).weights);
             return true;
         }
 
         void IUnit.OnMouseMove(Vector2Int pos)
         {
+            if (IsBusyByVisual) return;
             if (!(this as IFieldObject).Field.IsValidTileCoord(pos)) return;
             if ((this as IUnit).weights == null) GenerateWeights();
             (this as IUnit).Route = (this as IUnit).WeightMapGenerator.GetPath(this, pos, (this as IUnit).weights);
             (this as IFieldObject).Field.ShowRoute((this as IUnit).Route, (this as IUnit).weights);
         }
         
-        bool MoveUnit(Vector2Int targetpos)
-        {   
+        private bool MoveUnit(Vector2Int targetpos)
+        {
             if (!(this as IUnit).Field.IsValidTileCoord(targetpos)) return false;
             int StepCost = (this as IUnit).CostTile((this as IUnit).Field.battlefield[targetpos.x, targetpos.y]);
             if (StepCost > (this as IUnit).CurrentStats.TurnPoints) return false;
@@ -164,17 +181,19 @@ namespace IcwUnits
             return true;
         }
 
-        void IUnit.MoveByRoute(Vector2Int pos)
+        bool IUnit.MoveByRoute(Vector2Int pos)
         {
             IUnit unit = this as IUnit;
-            if (unit.weights == null) GenerateWeights();
-            if (unit.weights == null) return;
+            if (IsBusyByVisual) return false;
+            GenerateWeights();
+            if (unit.weights == null) return false;
             if (unit.Route == null || unit.Route.Count == 0 ||
                 unit.Route[^1] != unit.FieldPosition ||
                 unit.Route[0] != pos)
                 unit.Route = (this as IUnit).WeightMapGenerator.GetPath(this, pos, (this as IUnit).weights);
-            if (unit.Route == null || unit.Route.Count == 0) return;
+            if (unit.Route == null || unit.Route.Count == 0) return false;
             StartCoroutine(ShowMoveByRoute(pos));
+            return true;
         }
 
         void IUnit.NewTurn()
@@ -184,13 +203,34 @@ namespace IcwUnits
             (this as IUnit).Route = null;
         }
 
-        void IUnit.GetDamage(IcwUnitBaseAttack attack)
+        public void GetDamage(IcwUnitBaseAttackAbility attack)
         {
             (this as IUnit).battle.Presenter.ShowText($"{this.name} получает {attack.Damage} урона");
             (this as IUnit).CurrentStats.Health -= attack.Damage;
-            if ((this as IUnit).CurrentStats.Health<=0) 
-                ShowDied();
+            if ((this as IUnit).CurrentStats.Health<=0)
+            {
+                Vector3 pos = this.transform.position;
+                (this as IUnit).Field.RemoveObject(this);
+                ShowDied(pos);
+            }
         }
 
+        public virtual Vector2Int? DoAttack(Vector2Int pos)
+        {
+            bool result = (this as IUnit).AttackAbility.IsAttackPossible(pos);
+            Vector2Int? targetPos = null;
+            if (result)
+            {
+                targetPos = (this as IUnit).Field.GetFirstObstacleTile((this as IUnit).FieldPosition, pos);
+                if (targetPos != null) pos = targetPos.Value;
+                List<IFieldObject> currTile = (this as IUnit).Field.GetObjectsInTile(pos);
+                ((IUnit)this).AttackAbility.DoDamage();
+                foreach (IFieldObject o in currTile)
+                    if (o is IDamageAble) (o as IDamageAble).GetDamage((this as IUnit).AttackAbility);
+                (this as IUnit).Route = null;
+                (this as IUnit).weights = null;
+            }
+            return targetPos;
+        }
     }
 }
