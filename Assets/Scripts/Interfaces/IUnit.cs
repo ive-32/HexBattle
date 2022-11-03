@@ -15,12 +15,12 @@ namespace IcwUnits
         List<Vector2Int> Route { get; set; }
         IcwWeightMapGenerator WeightMapGenerator { get; set; }
         IcwUnitBaseAttackAbility AttackAbility { get; set; }
+        bool IsAvailable();
         string GetInfo();
         int CostTile(List<IFieldObject> tileObjects);
-
         int DefaultCost(IcwFieldObjectType objType) => objType.IsMoveObstacle ? IFieldObject.MaxStepCost : IFieldObject.BaseStepCost;
         bool OnSelect();
-        void OnMouseMove(Vector2Int pos);
+        //void OnMouseMove(Vector2Int pos);*/
         bool MoveByRoute(Vector2Int pos);
         void NewTurn();
         Vector2Int? DoAttack(Vector2Int target);

@@ -99,7 +99,10 @@ namespace IcwBattle
                 fieldObject.team == teamTurn)
             {
                 if (SelectedObject != fieldObject)
-                    fieldObject.OnSelect();
+                {
+                    if (!fieldObject.OnSelect())
+                        fieldObject = null;
+                }
                 else // выбрали тот же юнит - снимаем выделение с него
                     fieldObject = null;
                 SelectedObject = fieldObject;
@@ -108,50 +111,49 @@ namespace IcwBattle
             return fieldObject;
         }
 
-
         void IBattle.OnClick(Vector2Int pos)
         {
             if (!field.IsValidTileCoord(pos)) return; // ткнули не в поле игнорируем
             if (isBusy) return;
 
-            if (SelectedObject != null && (SelectedObject as IUnit).team != teamTurn) SelectedObject = null;
+            if (SelectedObject is IUnit unit && unit.team != teamTurn) SelectedObject = null;
 
             // проверяем что в тайле, если юнит запоминаем
             IUnit clickedUnit = DoSelectUnit(pos);
             
             // пытаемся ходить - если кликнули не в юнит или был выбран режим хождения
-            if (SelectedObject is IUnit &&
-                !(clickedUnit is IUnit) &&
+            if (SelectedObject is IUnit currUnit&&
+                !(clickedUnit is IUnit)  &&
                 (this as IBattle).PlayerActionMode == IBattle.BattleFlowActionMode.MoveMode)
             {
-                bool success = (SelectedObject as IUnit).MoveByRoute(pos);
+                bool success = currUnit.MoveByRoute(pos);
                 if (success) state = BattleFlowState.InTurn;
                 presenter.NeedUpdate = true;
                 return;
             }
 
             // вариант юнит был выбран и ткнули в чужой юнит атакуем
-            if (SelectedObject is IUnit &&
+            if (SelectedObject is IUnit selectedunit&&
                 ((clickedUnit != null &&
-                (SelectedObject as IUnit).team != clickedUnit.team)
+                selectedunit.team != clickedUnit.team)
                 || 
                 (this as IBattle).PlayerActionMode == IBattle.BattleFlowActionMode.AttackMode))
             {
-                Vector2Int? result = (SelectedObject as IUnit).DoAttack(pos); 
+                Vector2Int? result = selectedunit.DoAttack(pos); 
                 if (result != null) state = BattleFlowState.InTurn;
                 presenter.NeedUpdate = true;
                 return;
             }
         }
 
-        void IBattle.OnMouseMove(Vector2Int pos)
+        /*void IBattle.OnMouseMove(Vector2Int pos)
         {
             if (isBusy) return;
             if (SelectedObject == null) return;
             if (SelectedObject is IUnit && pos != SelectedObject.FieldPosition)
                 (SelectedObject as IUnit).OnMouseMove(pos);
             
-        }
+        }*/
 
         void IBattle.DoNextRound()
         {

@@ -52,6 +52,22 @@ namespace IcwUI
             info[InfoWindowNumber].text = (InfoWindowNumber == 0 ? "ActiveUnit\n": "Pointed Unit\n") + str;
         }
 
+        void IPresenter.OnMouseMove(Vector2Int pos)
+        {
+            if (!field.IsValidTileCoord(pos)) return;
+            if ((this as IPresenter).SelectedUnit is IUnit unit)
+            {
+                if (!unit.IsAvailable() || pos == (this as IPresenter).SelectedUnit.FieldPosition) return;
+                if (unit.weights == null)
+                    unit.weights = unit.WeightMapGenerator.GetWeightMap(unit);
+                unit.Route = unit.WeightMapGenerator.GetPath(unit, pos, unit.weights);
+                // перенести показ маршрута в презентор 
+                unit.Field.ShowRoute(unit.Route, unit.weights);
+                //((this as IPresenter).SelectedObject as IUnit).OnMouseMove(pos);
+                (this as IPresenter).NeedUpdate = true;
+            }
+        }
+
         private void Awake()
         {
             textout.text = "Presenter started";
@@ -69,6 +85,9 @@ namespace IcwUI
             }
 
         }
+
+        
+
         private void Update()
         {
             if (!(this as IPresenter).NeedUpdate) return;

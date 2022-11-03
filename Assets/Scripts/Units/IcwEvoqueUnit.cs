@@ -63,7 +63,7 @@ namespace IcwUnits
         {
             Vector2Int? targettile = base.DoAttack(pos);
             if (targettile != null)
-                StartCoroutine(VisualiseAttack((this as IUnit).Field.GetWorldCoord((Vector2Int)targettile)));
+                StartCoroutine(VisualiseAttack((this as IUnit).Field.GetWorldCoord(targettile.Value)));
             return targettile;
         }
     }

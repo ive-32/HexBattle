@@ -64,8 +64,8 @@ namespace IcwUI
             if (field.GetTileCoord(mousepos) != currentTile)
             {
                 currentTile = field.GetTileCoord(mousepos);
-                battle.OnMouseMove(currentTile);
-                presenter.NeedUpdate = true;
+                presenter.OnMouseMove(currentTile);
+                
             }
 
             // обновляем инфо

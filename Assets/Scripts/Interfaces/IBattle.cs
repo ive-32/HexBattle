@@ -12,7 +12,7 @@ namespace IcwBattle
         IPresenter Presenter { get; set; }
         IFieldObject SelectedObject { get; set; }
         void OnClick(Vector2Int pos);
-        void OnMouseMove(Vector2Int pos);
+        //void OnMouseMove(Vector2Int pos);
         void DoNextTurn();
         void DoNextRound();
         void UnitActionStart(IcwUnits.IUnit unit);

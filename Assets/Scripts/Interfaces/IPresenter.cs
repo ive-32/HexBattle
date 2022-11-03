@@ -14,6 +14,6 @@ namespace IcwUI
         //void ShowRoute(List<Vector2Int> route, IcwStepWeigth[,] weights);
         void ShowText(string str);
         void ShowInfo(string str, int InfoWindowNumber);
-
+        void OnMouseMove(Vector2Int pos);
     }
 }

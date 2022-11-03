@@ -128,6 +128,8 @@ namespace IcwUnits
 
 
         // методы IUnit        
+        bool IUnit.IsAvailable() => !IsBusyByVisual;
+
         string IUnit.GetInfo()
         {
             string result =
@@ -162,14 +164,14 @@ namespace IcwUnits
             return true;
         }
 
-        void IUnit.OnMouseMove(Vector2Int pos)
+        /*void IUnit.OnMouseMove(Vector2Int pos)
         {
             if (IsBusyByVisual) return;
             if (!(this as IFieldObject).Field.IsValidTileCoord(pos)) return;
             if ((this as IUnit).weights == null) GenerateWeights();
             (this as IUnit).Route = (this as IUnit).WeightMapGenerator.GetPath(this, pos, (this as IUnit).weights);
             (this as IFieldObject).Field.ShowRoute((this as IUnit).Route, (this as IUnit).weights);
-        }
+        }*/
         
         private bool MoveUnit(Vector2Int targetpos)
         {
