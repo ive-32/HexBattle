@@ -6,7 +6,7 @@ namespace IcwUnits
     public class IcwUnitBaseAttackAbility
     {   // позже придется обернуть в интерфейс , пока ленюсь
         public IUnit thisUnit { get; set; }
-        public float Range { get; set; } = 1;
+        public int Range { get; set; } = 1;
         public int Damage { get; set; } = 20;
         public int AttackCost { get; set; } = 6;
 

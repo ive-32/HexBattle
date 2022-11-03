@@ -44,22 +44,7 @@ namespace IcwField
                     {
                         (this as IField).AddObject(newobj, new Vector2Int(x, y));
                         continue;
-                    }
-                    TileBase currtile = MainTileMap.GetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle);
-                    string name = currtile.name;
-
-                    if (name.Contains("Grass"))
-                    {
-                        
-                        //(this as IField).AddObject(new IcwBaseFieldObject(), new Vector2Int(x, y));
-
-                    }
-                    if (name.Contains("Gravel"))
-                        //(this as IField).AddObject(new IcwBaseFieldObject(IFieldObject.ObjType.Gravel), new Vector2Int(x, y));
-                        ;
-                    if (name.Contains("Wall"))
-                        //(this as IField).AddObject(new IcwBaseFieldObject(IFieldObject.ObjType.Wall), new Vector2Int(x, y));
-                        ;
+                    }                    
                 }
             }
 

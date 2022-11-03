@@ -146,22 +146,13 @@ namespace IcwBattle
             }
         }
 
-        /*void IBattle.OnMouseMove(Vector2Int pos)
-        {
-            if (isBusy) return;
-            if (SelectedObject == null) return;
-            if (SelectedObject is IUnit && pos != SelectedObject.FieldPosition)
-                (SelectedObject as IUnit).OnMouseMove(pos);
-            
-        }*/
-
+        
         void IBattle.DoNextRound()
         {
             if (isBusy) return;
             presenter.ShowText("--- Следующий раунд ---");
             presenter.ShowText("--- TP одновлены для всех юнитов ---");
             SelectedObject = null;
-            //presenter.SelectedUnit = null;
             Vector2Int fieldSize = field.GetSize;
             for (int x = 0; x < fieldSize.x; x++)
                 for (int y = 0; y < fieldSize.y; y++)

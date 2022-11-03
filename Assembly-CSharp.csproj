@@ -74,13 +74,15 @@
     <Compile Include="Assets\Scripts\Interfaces\IField.cs" />
     <Compile Include="Assets\Scripts\IcwGlobalSettings.cs" />
     <Compile Include="Assets\Scripts\Field\IcwBaseFieldObject.cs" />
-    <Compile Include="Assets\Scripts\IcwStepWeigth.cs" />
+    <Compile Include="Assets\Scripts\Field\IcwStepWeigth.cs" />
     <Compile Include="Assets\Scripts\Field\IcwFieldObjectType.cs" />
     <Compile Include="Assets\Scripts\Field\IcwWeightMapGenerator.cs" />
     <Compile Include="Assets\Scripts\Units\IcwEvoqueUnit.cs" />
     <Compile Include="Assets\Scripts\Units\IcwSpiderUnit.cs" />
     <Compile Include="Assets\Scripts\UI\IcwUIEvents.cs" />
-    <Compile Include="Assets\Scripts\Interfaces\IDamageAble.cs" />
+    <Compile Include="Assets\Scripts\Interfaces\IDamageable.cs" />
+    <Compile Include="Assets\Scripts\Interfaces\ITeamAI.cs" />
+    <Compile Include="Assets\Scripts\AI\IcwTeamAI.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

@@ -6,7 +6,7 @@ using IcwBattle;
 
 namespace IcwUnits
 {
-    class IcwBaseUnit : MonoBehaviour, IUnit , IDamageAble//IFieldObject,
+    class IcwBaseUnit : MonoBehaviour, IUnit , IDamageable//IFieldObject,
     {
 
         // Реализация интерфейса IFieldObject
@@ -228,7 +228,7 @@ namespace IcwUnits
                 List<IFieldObject> currTile = (this as IUnit).Field.GetObjectsInTile(pos);
                 ((IUnit)this).AttackAbility.DoDamage();
                 foreach (IFieldObject o in currTile)
-                    if (o is IDamageAble) (o as IDamageAble).GetDamage((this as IUnit).AttackAbility);
+                    if (o is IDamageable) (o as IDamageable).GetDamage((this as IUnit).AttackAbility);
                 (this as IUnit).Route = null;
                 (this as IUnit).weights = null;
             }

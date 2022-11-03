@@ -1,7 +1,7 @@
 ﻿
 namespace IcwUnits
 {
-    public interface IDamageAble
+    public interface IDamageable
     {
         void GetDamage(IcwUnitBaseAttackAbility attack);
     }

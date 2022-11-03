@@ -157,5 +157,19 @@ namespace IcwField
             } 
             return path;
         }
+        public Vector2Int GetMinWeigthTileFromNeigbours(IcwStepWeigth[,] weigths, Vector2Int pos, int range)
+        {
+            List<Vector2Int> area = field.GetAreaInRange(pos, range);
+            Vector2Int result = pos;
+            //IcwStepWeigth minweight = new(IFieldObject.MaxStepCost, IFieldObject.MaxStepCost);
+
+            foreach (Vector2Int v in area)
+            {
+                if (weigths[result.x, result.y].CompareTo(weigths[v.x, v.y]) < 0)
+                    result = v;
+            }
+            return result;
+        }
+
     }
 }
