@@ -209,7 +209,7 @@ namespace IcwUI
 
             if (Input.GetMouseButtonUp(0))
             {
-                int dist = Random.Range(2, 5);
+                int dist = 7; // фиксируем для измерения скорости Random.Range(2, 7);
                 Vector2Int pos = field.GetTileCoord(mousepos);
                 if (field.IsValidTileCoord(pos))
                 {

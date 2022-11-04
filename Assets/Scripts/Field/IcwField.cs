@@ -194,43 +194,55 @@ namespace IcwField
             List<Vector2Int> visibleTiles = new();
             List<Vector2Int> invisibleTiles = new();
             Vector3Int startCube = IcwHexTile.OrthoToCube(pos);
-
-            while (viewarea.Count > 0 && range>0)
-            {
-                List<Vector2Int> ring = IcwHexTile.GetRing(pos, range);
-                foreach (Vector2Int v in ring)
+            Vector3 startWorldCoord = (this as IField).GetWorldCoord(pos);
+            Vector3[] kEpsVectors = {new(Vector3.kEpsilon, Vector3.kEpsilon, Vector3.kEpsilon),
+                                     new(-Vector3.kEpsilon, -Vector3.kEpsilon, -Vector3.kEpsilon) };
+            int currrange = 1;
+                while (viewarea.Count > 0 && currrange <= range)
                 {
-                    Vector3Int targetCube = IcwHexTile.OrthoToCube(v);
-                    int dist = IcwHexTile.Distance(startCube, targetCube);
-                    bool IsThisVectorVisible = true;
-                    for (int i = 1; i <= dist; i++)
+                    List<Vector2Int> ring = IcwHexTile.GetRing(pos, currrange);
+                    foreach (Vector2Int v in ring)
                     {
-                        Vector3 currPoint = Vector3.Lerp(startCube, targetCube, (float)i / dist);
-                        Vector2Int resTile = IcwHexTile.RoundCubeToOrhto(currPoint);
-                        if (!(this as IField).IsValidTileCoord(resTile)) 
-                        { 
-                            IsThisVectorVisible = false; 
-                            continue; 
-                        }
-                        if (battlefield[resTile.x, resTile.y] == null)
+                        Vector3Int targetCube = IcwHexTile.OrthoToCube(v);
+                        Vector3 targetWorldCoord = (this as IField).GetWorldCoord(v);
+                        int dist = IcwHexTile.Distance(startCube, targetCube);
+                        bool IsThisVectorVisible = true;
+                        for (int i = 1; i <= dist; i++)
                         {
-                            Debug.LogError($"tile {resTile} has no Any object!");
-                            continue;
+                            Vector3 currPoint = Vector3.Lerp(startWorldCoord, targetWorldCoord, (float)i / dist);
+                            List<Vector2Int> resTiles = new List<Vector2Int>();
+                            Vector2Int resTile;
+                            for (int epsindex = 0; epsindex<kEpsVectors.Length; epsindex++)
+                            {
+                                resTile = (this as IField).GetTileCoord(currPoint + kEpsVectors[epsindex]);
+                                if (!resTiles.Contains(resTile) && (this as IField).IsValidTileCoord(resTile)) 
+                                    resTiles.Add(resTile);
+                            }
+                            resTile = (this as IField).GetTileCoord(currPoint);
+                            if (resTiles.Count == 0) 
+                            { 
+                                IsThisVectorVisible = false; 
+                                continue; 
+                            }
+                        
+                            if (viewarea.Contains(resTile))
+                            {   // этот тайл еще не провер€ли на видимость добавл€ем
+                                if (IsThisVectorVisible)
+                                    visibleTiles.Add(resTile);
+                                else
+                                    invisibleTiles.Add(resTile);
+                                viewarea.Remove(resTile);
+                            }
+                            bool bLocalVisible = false;
+                            foreach (Vector2Int rt in resTiles)
+                            {
+                                bLocalVisible |= !battlefield[rt.x, rt.y].Exists(o => o.ObjectType.IsViewObstacle);
+                            }
+                            IsThisVectorVisible &= bLocalVisible;
                         }
-
-                        if (viewarea.Contains(resTile))
-                        {   // этот тайл еще не провер€ли на видимость добавл€ем
-                            if (IsThisVectorVisible)
-                                visibleTiles.Add(resTile);
-                            else
-                                invisibleTiles.Add(resTile);
-                            viewarea.Remove(resTile);
-                        }
-                        IsThisVectorVisible &= !battlefield[resTile.x, resTile.y].Exists(o => o.ObjectType.IsViewObstacle);
                     }
+                    currrange++;
                 }
-                range--;
-            }
             return visibleTiles;
         }
 
