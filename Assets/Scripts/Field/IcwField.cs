@@ -217,20 +217,16 @@ namespace IcwField
                             Debug.LogError($"tile {resTile} has no Any object!");
                             continue;
                         }
-                        if (battlefield[resTile.x, resTile.y].Count <= 0) continue;
-                        if (battlefield[resTile.x, resTile.y].Count > 1)
-                        {
-                            bool isobs = battlefield[resTile.x, resTile.y][1].ObjectType.IsViewObstacle;
-                            Debug.LogWarning($"tile {isobs} now checked");
+
+                        if (viewarea.Contains(resTile))
+                        {   // этот тайл еще не провер€ли на видимость добавл€ем
+                            if (IsThisVectorVisible)
+                                visibleTiles.Add(resTile);
+                            else
+                                invisibleTiles.Add(resTile);
+                            viewarea.Remove(resTile);
                         }
                         IsThisVectorVisible &= !battlefield[resTile.x, resTile.y].Exists(o => o.ObjectType.IsViewObstacle);
-                        if (!viewarea.Contains(resTile)) continue; // уже этот тайл провер€ли на видимость, не добавл€ем 
-                        
-                        if (IsThisVectorVisible)
-                            visibleTiles.Add(resTile);
-                        else
-                            invisibleTiles.Add(resTile);
-                        viewarea.Remove(resTile);
                     }
                 }
                 range--;

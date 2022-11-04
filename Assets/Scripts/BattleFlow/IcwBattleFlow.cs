@@ -4,6 +4,7 @@ using UnityEngine.Tilemaps;
 using IcwField;
 using IcwUnits;
 using IcwUI;
+using IcwAI;
 
 namespace IcwBattle
 {
@@ -20,7 +21,7 @@ namespace IcwBattle
         private int teamTurn = 1;
         private bool isBusy = false;
         private BattleFlowState state = BattleFlowState.BeforeTurn;
-        
+        private ITeamAI ai;
 
         public IFieldObject SelectedObject { get; set; } = null;
         IPresenter IBattle.Presenter { get => presenter; set => presenter = value; } 
@@ -39,16 +40,23 @@ namespace IcwBattle
 
         private void Start()
         {
+            ai = new IcwTeamAI();
+            ai.Battle = this;
+            ai.Field = field;
+            ai.Presenter = presenter;
+
             IcwBattleFieldGenerator bg = new();
             bg.CreateMap(field, MainTileMap, listOfObjTypes);
             SetUnits();
-            (this as IBattle).DoNextTurn();
+            (this as IBattle).DoNextRound();
         }
 
         public void SetUnits()
         {
             // заглушка 
             // Команды: четные команда 1 нечетые команда 2
+            string[] Names = { "Джо", "Рейчел", "Фиби", "Моника", "Чендлер", "Росс" };
+
             Vector2Int[] startTemplate = { 
                 new Vector2Int(1, 1),
                 new Vector2Int(field.GetSize.x - 2, field.GetSize.y - 2),
@@ -59,6 +67,7 @@ namespace IcwBattle
                 };
 
             for (int i = 0; i < 6; i++)
+            //for (int i = 0; i < 2; i++)
             {
                 GameObject newUnitObject = Instantiate(UnitPrefabs[Random.Range(0, UnitPrefabs.Length)], UnitLayer.transform);
                 newUnitObject.TryGetComponent<IUnit>(out IUnit unit);
@@ -67,6 +76,11 @@ namespace IcwBattle
                 (unit as IFieldObject).Field.AddObject((unit as IFieldObject), startTemplate[i]);
                 (unit as IUnit).WeightMapGenerator = WeightMapGenerator;
                 (unit as IUnit).battle = this;
+                (unit as IUnit).UnitName = $"{(unit.team == 0 ? "Красный " : "Зеленый ")} {(unit as IUnit).UnitName} {Names[i]}";
+                if (unit.team % 2 == 0)
+                    ai.Enemies.Add(unit as IUnit);
+                else
+                    ai.TeamMates.Add(unit as IUnit);
             }
         }
 
@@ -81,12 +95,12 @@ namespace IcwBattle
         void IBattle.UnitActionComplete(IcwUnits.IUnit unit)
         {
             isBusy = false;
-            if (unit.CurrentStats.TurnPoints <= 0)
+            /*if (unit.CurrentStats.TurnPoints <= 0)
             {
                 SelectedObject = null;
                 presenter.ShowText("ОД закончились. Передаем ход другой команде");
                 (this as IBattle).DoNextTurn();
-            }
+            }*/
         }
 
         IUnit DoSelectUnit(Vector2Int pos)
@@ -162,19 +176,28 @@ namespace IcwBattle
                     (unit as IUnit).NewTurn();
                 }
             teamTurn = 1;
+            ai.DoNewRound();
             (this as IBattle).DoNextTurn();
         }
 
         void IBattle.DoNextTurn()
         {
             string[] teamnames = { "красные", "зеленые" };
-            if (isBusy) return;
+            //if (isBusy) return;
             teamTurn++;
             teamTurn %= 2;
             presenter.ShowText($"--- Ход команды {teamnames[teamTurn % 2]}");
-            presenter.ShowText("Выбирайте любого юнита для хода");
             SelectedObject = null;
-            //presenter.SelectedUnit = SelectedObject as IUnit;
+            if (teamTurn % 2 == 1)
+            {
+                isBusy = true;
+                ai.DoOneTurn();
+                return;
+            }
+            else
+            isBusy = false;
+
+            presenter.ShowText("Выбирайте любого юнита для хода");
             presenter.NeedUpdate = true;
             state = BattleFlowState.BeforeTurn;
         }

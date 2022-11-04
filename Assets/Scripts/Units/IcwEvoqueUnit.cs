@@ -14,7 +14,7 @@ namespace IcwUnits
             base.Awake();
             (this as IUnit).AttackAbility.AttackCost = 3;
             (this as IUnit).BaseStats.TurnPoints = Random.Range(20, 28);
-            //StartCoroutine(VisualiseAttack((this as IUnit).Field.GetWorldCoord(new Vector2Int(3,3))));
+            UnitName = $"Эвок";
         }
 
         public override int CostTile(List<IFieldObject> tileObject)

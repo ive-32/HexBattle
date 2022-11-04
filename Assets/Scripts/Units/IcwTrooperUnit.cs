@@ -21,6 +21,7 @@ namespace IcwUnits
             blasterColor = Random.ColorHSV(0, 1, 0.7f, 1, 0.4f, 0.6f);
             bullet2.GetComponent<SpriteRenderer>().color = blasterColor;
             Light.GetComponent<Light2D>().color = blasterColor;
+            UnitName = $"Штурмовик";
         }
 
         public override int CostTile(List<IFieldObject> tileObject)

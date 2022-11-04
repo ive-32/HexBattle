@@ -2,8 +2,9 @@
 using IcwUnits;
 using IcwField;
 using IcwBattle;
+using IcwUI;
 
-namespace IcwTeamAI
+namespace IcwAI
 {
     public interface ITeamAI
     {
@@ -11,6 +12,7 @@ namespace IcwTeamAI
         List<IUnit> TeamMates { get; set; } // список союзников
         IField Field { get; set; } // поле 
         IBattle Battle { get; set; }    // бой в котором дерется команда
+        IPresenter Presenter { get; set; } // презентер для вывода текста и визуала
         void DoOneTurn(); // Выполнить один ход
         void DoNewRound(); // Следующий раунд
 

@@ -51,7 +51,7 @@ namespace IcwUI
             //TestViewRange(); return;
             //TestTilesOnLine();  return; // тестировал как строит линию между двумя тайлами
             //TestIsVisibleFrom();  return; // тестировал как строит линию между двумя тайлами
-            //TestViewVisibleRange(); return; // тестировал как показывает кольцо -  далее будем делать visbile range
+            //TestViewVisibleRange(); return; // тестировал как показывает visbile range
 
             Vector3 mousepos = gamecamera.ScreenToWorldPoint(Input.mousePosition);
             mousepos.z = 0;

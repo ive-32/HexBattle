@@ -8,6 +8,7 @@ namespace IcwUnits
     public interface IUnit : IFieldObject
     {
         int team { get; set; }
+        string UnitName { get; set; }
         IcwBattle.IBattle battle { get; set; }
         IcwUnitStats CurrentStats { get; set; }
         IcwUnitStats BaseStats { get; set; }

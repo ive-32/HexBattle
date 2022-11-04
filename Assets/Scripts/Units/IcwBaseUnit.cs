@@ -24,6 +24,7 @@ namespace IcwUnits
             }
         }
         // реализация интерфейса IUnit
+        public string UnitName { get; set; }
         IcwWeightMapGenerator IUnit.WeightMapGenerator { get; set; }
         IcwUnitStats IUnit.CurrentStats { get; set; } = new IcwUnitStats();
         IcwUnitStats IUnit.BaseStats { get; set; } = new IcwUnitStats();
@@ -53,6 +54,7 @@ namespace IcwUnits
             (this as IUnit).CurrentStats.SetStats((this as IUnit).BaseStats);
             (this as IUnit).AttackAbility.thisUnit = this;
             (this as IUnit).ObjectType = objtype;
+            UnitName = $"Базовый Юнит";
         }
 
         protected virtual void Start()
@@ -66,6 +68,7 @@ namespace IcwUnits
                 teamcolor[0].gameObject.SetActive((this as IUnit).team % 2 == 0);
                 teamcolor[1].gameObject.SetActive((this as IUnit).team % 2 != 0);
             }
+           
         }
 
         IEnumerator ShowMoveByRoute(Vector2Int pos)
@@ -133,7 +136,7 @@ namespace IcwUnits
         string IUnit.GetInfo()
         {
             string result =
-                $"Name: {this.name},\n" +
+                $"Name: {UnitName},\n" +
                 $"Health {(this as IUnit).CurrentStats.Health} of {(this as IUnit).BaseStats.Health}\n" +
                 $"TurnPoints {(this as IUnit).CurrentStats.TurnPoints} of {(this as IUnit).BaseStats.TurnPoints}\n" +
                 $"Damage Value {(this as IUnit).AttackAbility.Damage}";

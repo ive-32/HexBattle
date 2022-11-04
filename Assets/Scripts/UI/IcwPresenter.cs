@@ -41,9 +41,9 @@ namespace IcwUI
         {
             string maintext = textout.text;
             string[] res = maintext.Split('\n');
-            if (res.Length>3)
+            if (res.Length>100)
             {
-                maintext = string.Join('\n', res, res.Length - 3, 3);
+                maintext = string.Join('\n', res, res.Length - 100, 100);
             }
             textout.text = maintext + "\n" + str;
         }
