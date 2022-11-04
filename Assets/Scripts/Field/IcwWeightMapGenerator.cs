@@ -11,29 +11,26 @@ namespace IcwField
         IUnit caller;
         List<Vector2Int> tilesToCheck = new List<Vector2Int>();
         
-        Vector2Int GetNeigbourForHex(int index, bool ForEvenRow = false)
+        /*Vector2Int GetNeigbourForHex(int index, bool ForEvenRow = false)
         {
             Vector2Int[] checktemplateodd = { Vector2Int.up, Vector2Int.one, Vector2Int.right, new Vector2Int(1, -1), Vector2Int.down, Vector2Int.left };
             Vector2Int[] checktemplateeven = { new Vector2Int(-1, 1), Vector2Int.up, Vector2Int.right, Vector2Int.down, new Vector2Int(-1, -1), Vector2Int.left };
             return ForEvenRow ? checktemplateeven[index] : checktemplateodd[index];
-        }
-        Vector2Int[] GetAllNeigboursForHex(bool ForEvenRow = false)
+        }*/
+        /*Vector2Int[] GetAllNeigboursForHex(bool ForEvenRow = false)
         {
-            Vector2Int[] checktemplateodd = { Vector2Int.up, Vector2Int.one, Vector2Int.right, new Vector2Int(1, -1), Vector2Int.down, Vector2Int.left };
-            Vector2Int[] checktemplateeven = { new Vector2Int(-1, 1), Vector2Int.up, Vector2Int.right, Vector2Int.down, new Vector2Int(-1, -1), Vector2Int.left };
+            Vector2Int[] checktemplateeven = { Vector2Int.up, Vector2Int.one, Vector2Int.right, new Vector2Int(1, -1), Vector2Int.down, Vector2Int.left };
+            Vector2Int[] checktemplateodd = { new Vector2Int(-1, 1), Vector2Int.up, Vector2Int.right, Vector2Int.down, new Vector2Int(-1, -1), Vector2Int.left };
             return ForEvenRow ? checktemplateeven : checktemplateodd;
-        }
+        }*/
 
         private void CheckOneTile()
         {
-            Vector2Int[] checktemplateodd = { Vector2Int.up, Vector2Int.one, Vector2Int.right, new Vector2Int(1, -1), Vector2Int.down, Vector2Int.left };
-            Vector2Int[] checktemplateeven = { new Vector2Int(-1, 1), Vector2Int.up, Vector2Int.right, Vector2Int.down, new Vector2Int(-1, -1), Vector2Int.left };
             Vector2Int currTile = tilesToCheck[0];
-            Vector2Int[] checktemplate = currTile.y % 2 == 0 ? checktemplateodd : checktemplateeven;
-
+            Vector2Int[] checktemplate = field.GetTileNeigbours(currTile);
             foreach (Vector2Int neigbourTile in checktemplate)
             {
-                Vector2Int v = neigbourTile + currTile;
+                Vector2Int v = neigbourTile; // + currTile;
                 if (!field.IsValidTileCoord(v)) continue;
                 int turn = weightmap[currTile.x, currTile.y].turn;
                 int newcost = caller.CostTile(field.battlefield[v.x, v.y]);
@@ -74,7 +71,7 @@ namespace IcwField
             if (!(acaller is IFieldObject)) return null;
             caller = acaller;
             field = (caller as IFieldObject).Field;
-            Vector2Int fieldsize = field.GetSize;
+            Vector2Int fieldsize = field.Size;
             Vector2Int objPosition = acaller.FieldPosition;
             weightmap = new IcwStepWeigth[fieldsize.x, fieldsize.y];
             tilesToCheck.Clear();
@@ -120,13 +117,13 @@ namespace IcwField
             {
                 numiterations++;
                 if (numiterations > 1000) Debug.LogError("FindPath cycling!");
-                Vector2Int[] neighbours = GetAllNeigboursForHex(currpos.y % 2 == 1);
+                Vector2Int[] neighbours = field.GetTileNeigbours(currpos);//GetAllNeigboursForHex(currpos.y % 2 == 1);
                 int minturn = IFieldObject.MaxStepCost;
                 int mincost = IFieldObject.MaxStepCost;
                 Vector2Int newpos = new Vector2Int(-1, -1);
                 foreach (Vector2Int n in neighbours)
                 {
-                    Vector2Int tmppos = currpos + n;
+                    Vector2Int tmppos = n;// currpos + n;
                     if (!field.IsValidTileCoord(tmppos)) continue;
                     if (weightmap[tmppos.x, tmppos.y] == null) continue;
                     // ищем минимальную клетку - из равных берем рандомом чтобы разнообразнее ходили
@@ -161,7 +158,6 @@ namespace IcwField
         {
             List<Vector2Int> area = field.GetAreaInRange(pos, range);
             Vector2Int result = pos;
-            //IcwStepWeigth minweight = new(IFieldObject.MaxStepCost, IFieldObject.MaxStepCost);
 
             foreach (Vector2Int v in area)
             {

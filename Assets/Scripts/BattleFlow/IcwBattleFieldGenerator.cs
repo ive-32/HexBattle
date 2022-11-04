@@ -9,7 +9,6 @@ namespace IcwBattle
 {
     class IcwBattleFieldGenerator
     {
-        Vector2Int LeftDownAngle = new Vector2Int(10, 3);
 
         public void CreateMap(IField field, Tilemap MainTileMap, List<IcwFieldObjectType> objtypes)
         {
@@ -17,14 +16,14 @@ namespace IcwBattle
             // далее будут параметры карты - болотистая, скалистая, ровная и т.п.
             // пока пустой - карту сделал руками для тестов
             // тащим содержимое тайлов создаем объекты
-            Vector2Int fieldSize = field.GetSize;
+            Vector2Int fieldSize = field.Size;
             for (int x = 0; x < fieldSize.x; x++)
             {
                 for (int y = 0; y < fieldSize.y; y++)
                 {
                     field.battlefield[x, y] = new List<IFieldObject>();
                     IFieldObject newobj = new IcwBaseFieldObject();
-                    TileBase currtile = MainTileMap.GetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle);
+                    TileBase currtile = MainTileMap.GetTile(new Vector3Int(x, y, 0));
                     IcwFieldObjectType currtiletype;
                     if (currtile !=null)
                         currtiletype = objtypes.Find(o => o.TileSprite.Find(ts => ts == currtile));

@@ -36,15 +36,20 @@ namespace IcwBattle
             if (IcwAtomFunc.IsNull(presenter, this.name))
                 Destroy(this.gameObject);
 
-        }
-
-        private void Start()
-        {
-            ai = new IcwTeamAI();
+            this.TryGetComponent<ITeamAI>(out ai);
+            if (IcwAtomFunc.IsNull(ai, this.name))
+                Destroy(this.gameObject);
+            
             ai.Battle = this;
             ai.Field = field;
             ai.Presenter = presenter;
 
+        }
+
+        private void Start()
+        {
+            //ai = new IcwTeamAI();
+            
             IcwBattleFieldGenerator bg = new();
             bg.CreateMap(field, MainTileMap, listOfObjTypes);
             SetUnits();
@@ -59,11 +64,11 @@ namespace IcwBattle
 
             Vector2Int[] startTemplate = { 
                 new Vector2Int(1, 1),
-                new Vector2Int(field.GetSize.x - 2, field.GetSize.y - 2),
+                new Vector2Int(field.Size.x - 2, field.Size.y - 2),
                 new Vector2Int(0, 2),
-                new Vector2Int(field.GetSize.x - 1, field.GetSize.y - 3),
+                new Vector2Int(field.Size.x - 1, field.Size.y - 3),
                 new Vector2Int(2, 0),
-                new Vector2Int(field.GetSize.x - 3, field.GetSize.y - 1)
+                new Vector2Int(field.Size.x - 3, field.Size.y - 1)
                 };
 
             for (int i = 0; i < 6; i++)
@@ -142,6 +147,7 @@ namespace IcwBattle
             {
                 bool success = currUnit.MoveByRoute(pos);
                 if (success) state = BattleFlowState.InTurn;
+                presenter.drawer.ClearTiles();
                 presenter.NeedUpdate = true;
                 return;
             }
@@ -155,6 +161,7 @@ namespace IcwBattle
             {
                 Vector2Int? result = selectedunit.DoAttack(pos); 
                 if (result != null) state = BattleFlowState.InTurn;
+                presenter.drawer.ClearTiles();
                 presenter.NeedUpdate = true;
                 return;
             }
@@ -167,7 +174,7 @@ namespace IcwBattle
             presenter.ShowText("--- Следующий раунд ---");
             presenter.ShowText("--- TP одновлены для всех юнитов ---");
             SelectedObject = null;
-            Vector2Int fieldSize = field.GetSize;
+            Vector2Int fieldSize = field.Size;
             for (int x = 0; x < fieldSize.x; x++)
                 for (int y = 0; y < fieldSize.y; y++)
                 {

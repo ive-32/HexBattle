@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\Interfaces\IFieldObject.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IUnit.cs" />
     <Compile Include="Assets\Scripts\Units\IcwR2D2Unit.cs" />
+    <Compile Include="Assets\Scripts\UI\IcwTileDrawer.cs" />
     <Compile Include="Assets\Scripts\AI\IcwTeamAI.cs" />
     <Compile Include="Assets\Scripts\Units\IcwUnitStats.cs" />
     <Compile Include="Assets\Scripts\IcwAtomFunc.cs" />

@@ -110,10 +110,10 @@ namespace IcwUI
                 {
                     if (position1 != pos)
                         dist = field.Distance(position1, pos);
-                    field.ShowCoordTile(true);
+                    //field.ShowCoordTile(true);
                     presenter.ShowText($"dist {dist} points {position1}, {pos}");
-                    field.ShowBorderTile(position1, 1);
-                    field.ShowBorderTile(pos, 1);
+                    presenter.drawer.ShowBorderTile(position1, 1);
+                    presenter.drawer.ShowBorderTile(pos, 1);
                     position1 = pos;
                 }
                 presenter.NeedUpdate = false;
@@ -133,13 +133,13 @@ namespace IcwUI
                 Vector2Int pos = field.GetTileCoord(mousepos);
                 if (field.IsValidTileCoord(pos))
                 {
-                    field.ShowCoordTile(true);
+                    //field.ShowCoordTile(true);
                     if (position1 != pos)
                     {
                         List<Vector2Int> line;
                         bool IsVisible = field.IsTileVisibleFrom(position1, pos, out line);
                         foreach (Vector2Int v in line)
-                            field.ShowBorderTile(v, 1);
+                            presenter.drawer.ShowBorderTile(v, 1);
                         presenter.ShowText($"isVisivle? from {position1} to {pos} is {IsVisible}");
                     }
                     position1 = pos;
@@ -161,12 +161,12 @@ namespace IcwUI
                 Vector2Int pos = field.GetTileCoord(mousepos);
                 if (field.IsValidTileCoord(pos))
                 {
-                    field.ShowCoordTile(true);
+                    //field.ShowCoordTile(true);
                     if (position1 != pos)
                     {
                         List<Vector2Int> line = field.GetTilesOnLine(position1, pos);
                         foreach (Vector2Int v in line)
-                            field.ShowBorderTile(v, 1);
+                            presenter.drawer.ShowBorderTile(v, 1);
                         presenter.ShowText($"num tiles {line.Count} points {position1}, {pos}");
                     }
                     position1 = pos;
@@ -190,10 +190,10 @@ namespace IcwUI
                 if (field.IsValidTileCoord(pos))
                 {
                     List<Vector2Int> viewrangelist = field.GetAreaInRange(pos, dist);
-                    field.ShowCoordTile(true);
+                    //field.ShowCoordTile(true);
                     presenter.ShowText($"dist {dist} points {pos}");
                     foreach(Vector2Int viewpos in viewrangelist)
-                        field.ShowBorderTile(viewpos, 1);
+                        presenter.drawer.ShowBorderTile(viewpos, 1);
                 }
                 presenter.NeedUpdate = false;
             }
@@ -214,12 +214,10 @@ namespace IcwUI
                 if (field.IsValidTileCoord(pos))
                 {
                     List<Vector2Int> viewrangelist = field.GetVisibleTiles(pos, dist);
-                    //field.ShowCoordTile(true);
-                    field.HideAllInfo();
                     presenter.ShowText($"{viewrangelist.Count} dist {dist} points {pos}");
                     foreach (Vector2Int viewpos in viewrangelist)
-                        field.ShowBorderTile(viewpos, 1);
-                    field.ShowBorderTile(pos, 4);
+                        presenter.drawer.ShowBorderTile(viewpos, 1);
+                    presenter.drawer.ShowBorderTile(pos, 4);
                 }
                 presenter.NeedUpdate = false;
             }

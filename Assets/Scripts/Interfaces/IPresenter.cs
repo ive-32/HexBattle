@@ -10,8 +10,7 @@ namespace IcwUI
         bool NeedUpdate { get; set; }
         IUnit SelectedUnit { get; set; }
         IUnit PointedUnit { get; set; }
-        //void ShowTurnArea(IcwStepWeigth[,] weights);
-        //void ShowRoute(List<Vector2Int> route, IcwStepWeigth[,] weights);
+        public IcwTileDrawer drawer { get; set; }
         void ShowText(string str);
         void ShowInfo(string str, int InfoWindowNumber);
         void OnMouseMove(Vector2Int pos);

@@ -13,14 +13,14 @@ namespace IcwField
 
         static public Vector2Int CubeToOrtho(Vector3Int cube)
         {
-            int col = cube.x + (cube.y + (cube.y & 1)) / 2;
+            int col = cube.x + (cube.y - (cube.y & 1)) / 2;
             int row = cube.y;
             return new Vector2Int(col, row);
         }
 
         static public Vector3Int OrthoToCube(Vector2Int tile)
         {
-            int q = tile.x - (tile.y + (tile.y & 1)) / 2;
+            int q = tile.x - (tile.y - (tile.y & 1)) / 2;
             int r = tile.y;
             int s = -q - r;
             return new Vector3Int(q, r, s);

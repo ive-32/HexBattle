@@ -10,17 +10,15 @@ namespace IcwField
     {
         public int SizeX { get; set; } = 14;
         public int SizeY { get; set; } = 11;
-        private Vector2Int LeftDownAngle = new Vector2Int(10, 3);
-        Vector2Int IField.GetSize => new Vector2Int(SizeX, SizeY);
-        Vector3 IField.GetWorldCoord(Vector2Int tilecoord) => MainTileMap.GetCellCenterWorld((Vector3Int)(tilecoord + LeftDownAngle));
-        Vector2Int IField.GetTileCoord(Vector3 worldPosition) => (Vector2Int)MainTileMap.WorldToCell(worldPosition) - LeftDownAngle;
+        Vector2Int IField.Size => new Vector2Int(SizeX, SizeY);
+        Vector3 IField.GetWorldCoord(Vector2Int tilecoord) => MainTileMap.GetCellCenterWorld((Vector3Int)(tilecoord));
+        Vector2Int IField.GetTileCoord(Vector3 worldPosition) => (Vector2Int)MainTileMap.WorldToCell(worldPosition);
         bool IField.IsValidTileCoord(Vector2Int pos) => pos.x >= 0 && pos.y >= 0 && pos.x < SizeX && pos.y < SizeY;
         public List<IFieldObject>[,] battlefield { get; set; }
         // Присоединенные префабы
-        public GameObject MainTileMapObject;
         public GameObject AreaTileMapObject;
-        private Tilemap MainTileMap;
-        private Tilemap AreaTileMap;
+        public Tilemap MainTileMap;
+        public Tilemap AreaTileMap;
         public GameObject TextPrefab; // для отладки
         public GameObject DebugLayer; // для отладки
         public TileBase[] TileBorder;
@@ -39,7 +37,7 @@ namespace IcwField
                 {
                     battlefield[x, y] = new List<IFieldObject>();
                     IFieldObject newobj = new IcwBaseFieldObject();
-                    TileBase tb = MainTileMap.GetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle);
+                    TileBase tb = MainTileMap.GetTile(new Vector3Int(x, y, 0));
                     if (tb == null)
                     {
                         (this as IField).AddObject(newobj, new Vector2Int(x, y));
@@ -52,17 +50,7 @@ namespace IcwField
 
         private void Awake()
         {
-            if (IcwAtomFunc.IsNull(MainTileMapObject, this.name))
-            {
-                Destroy(this.gameObject);
-                return;
-            }
-            MainTileMapObject.TryGetComponent<Tilemap>(out MainTileMap);
-            if (IcwAtomFunc.IsNull(MainTileMap, this.name))
-            {
-                Destroy(this.gameObject);
-                return;
-            }
+            
 
             AreaTileMapObject.TryGetComponent<Tilemap>(out AreaTileMap);
             if (IcwAtomFunc.IsNull(AreaTileMap, this.name))
@@ -112,10 +100,10 @@ namespace IcwField
             return (this as IField).battlefield[pos.x, pos.y];
         }
 
-        Vector2Int[] GetTileNeigbours(Vector2Int tileCoord)
+        Vector2Int[] IField.GetTileNeigbours(Vector2Int tileCoord)
         {
-            Vector2Int[] checktemplateodd = { Vector2Int.up + tileCoord, Vector2Int.one + tileCoord, Vector2Int.right + tileCoord, new Vector2Int(1, -1) + tileCoord, Vector2Int.down + tileCoord, Vector2Int.left + tileCoord };
-            Vector2Int[] checktemplateeven = { new Vector2Int(-1, 1) + tileCoord, Vector2Int.up + tileCoord, Vector2Int.right + tileCoord, Vector2Int.down + tileCoord, new Vector2Int(-1, -1) + tileCoord, Vector2Int.left + tileCoord };
+            Vector2Int[] checktemplateeven = { Vector2Int.up + tileCoord, Vector2Int.one + tileCoord, Vector2Int.right + tileCoord, new Vector2Int(1, -1) + tileCoord, Vector2Int.down + tileCoord, Vector2Int.left + tileCoord };
+            Vector2Int[] checktemplateodd = { new Vector2Int(-1, 1) + tileCoord, Vector2Int.up + tileCoord, Vector2Int.right + tileCoord, Vector2Int.down + tileCoord, new Vector2Int(-1, -1) + tileCoord, Vector2Int.left + tileCoord };
             return tileCoord.y % 2 == 1 ? checktemplateeven : checktemplateodd;
         }
 
@@ -246,30 +234,19 @@ namespace IcwField
             return visibleTiles;
         }
 
-        private void ShowCostForTile(Vector2Int pos, IcwStepWeigth weight)
-        {
-            if (weight == null) return;
-            GameObject gm = Instantiate(TextPrefab, (this as IField).GetWorldCoord(new Vector2Int(pos.x, pos.y)), Quaternion.identity, DebugLayer.transform);
-            gm.TryGetComponent<TextMeshProUGUI>(out TextMeshProUGUI tmpro);
-            if (IcwAtomFunc.IsNull(tmpro, this.name))
-            {
-                Destroy(gm);
-                return;
-            }
-            tmpro.text = $"{weight.turn} t\n{weight.cost} tp";
-        }
-
-        void IField.ShowBorderTile(Vector2Int tile1, int? tiletype)
+       
+        
+        /*void IField.ShowBorderTile(Vector2Int tile1, int? tiletype)
         {
             if (tiletype < 0) tiletype = 0;
             if (tiletype >= TileBorder.Length) tiletype = TileBorder.Length - 1;
             if (tiletype != null)
-                AreaTileMap.SetTile(new Vector3Int(tile1.x, tile1.y, 0) + (Vector3Int)LeftDownAngle, TileBorder[(int)tiletype]);
+                AreaTileMap.SetTile(new Vector3Int(tile1.x, tile1.y, 0), TileBorder[(int)tiletype]);
             else
-                AreaTileMap.SetTile(new Vector3Int(tile1.x, tile1.y, 0) + (Vector3Int)LeftDownAngle, null);
+                AreaTileMap.SetTile(new Vector3Int(tile1.x, tile1.y, 0), null);
         }
 
-        void IField.ShowCoordTile(bool show)
+        /*void IField.ShowCoordTile(bool show)
         {
             (this as IField).HideAllInfo();
 
@@ -279,7 +256,7 @@ namespace IcwField
                 {
                     if (show)
                     {
-                        AreaTileMap.SetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle, TileBorder[3]);
+                        AreaTileMap.SetTile(new Vector3Int(x, y, 0), TileBorder[3]);
                         GameObject gm = Instantiate(TextPrefab, (this as IField).GetWorldCoord(new Vector2Int(x, y)), Quaternion.identity, DebugLayer.transform);
                         gm.TryGetComponent<TextMeshProUGUI>(out TextMeshProUGUI tmpro);
                         if (IcwAtomFunc.IsNull(tmpro, this.name))
@@ -290,50 +267,19 @@ namespace IcwField
                         tmpro.text = $"{x} - {y}";
                     }
                     else
-                        AreaTileMap.SetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle, null);
+                        AreaTileMap.SetTile(new Vector3Int(x, y, 0), null);
                 }
         }
 
-        void IField.ShowTurnArea(IcwStepWeigth[,] weights)//, IFieldObject fieldObject) это понадобится 
-        {
-            // отображаем на поле инормацию по юниту
-            // сейчас показывем ходы и цену хода
-            // далее будем подсвечивать тайлы куда можно пойти и куда можно стрелять
-            // очищаем сетку с подсказками
-            (this as IField).HideAllInfo();
-
-            if (weights == null) return; // если не выбран ни один юнит или нет карты весов то возвращаемся
-            for (int x = 0; x < SizeX; x++)
-                for (int y = 0; y < SizeY; y++)
-                {
-                    if (weights[x, y] == null) continue;
-                    if (weights[x, y].turn == IFieldObject.MaxStepCost || weights[x, y].cost == IFieldObject.MaxStepCost) continue;
-                    if (IcwGlobalSettings.ShowStepCosts) ShowCostForTile(new Vector2Int(x, y), weights[x, y]);
-                    if (weights[x, y].turn == 1) AreaTileMap.SetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle, TileBorder[0]);
-                    else AreaTileMap.SetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle, null);
-                }
-        }
-        void IField.ShowRoute(List<Vector2Int> route, IcwStepWeigth[,] weights)
-        {
-            (this as IField).ShowTurnArea(weights);
-            if (route == null)
-                return;
-            foreach (Vector2Int v in route)
-            {
-                AreaTileMap.SetTile(new Vector3Int(v.x, v.y, 0) + (Vector3Int)LeftDownAngle, TileBorder[1]);
-                ShowCostForTile(v, weights[v.x, v.y]);
-            }
-            //ShowCostForTile(route[0], obj.weights[route[0].x, route[0].y]);
-        }
-
+       
         void IField.HideAllInfo()
         {
             foreach (Transform child in DebugLayer.transform)
                 GameObject.Destroy(child.gameObject);
             for (int x = 0; x < SizeX; x++)
                 for (int y = 0; y < SizeY; y++)
-                    AreaTileMap.SetTile(new Vector3Int(x, y, 0) + (Vector3Int)LeftDownAngle, null);
-        }
+                    AreaTileMap.SetTile(new Vector3Int(x, y, 0), null);
+        }*/
 
     }
 
