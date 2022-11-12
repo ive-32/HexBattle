@@ -14,12 +14,12 @@ namespace IcwUnits
         {
             if (thisUnit.CurrentStats.TurnPoints < AttackCost)
             {
-                thisUnit.battle.Presenter.ShowText($"{thisUnit} не хватает очков действия для атаки");
+                thisUnit.Battle.Presenter.ShowText($"{thisUnit} не хватает очков действия для атаки");
                 return false;
             }
             if (thisUnit.Field.Distance(pos, thisUnit.FieldPosition) > Range)
             {
-                thisUnit.battle.Presenter.ShowText($"{thisUnit} цель далеко, не могу атаковать");
+                thisUnit.Battle.Presenter.ShowText($"{thisUnit} цель далеко, не могу атаковать");
                 return false;
             }
             return true;
@@ -27,7 +27,7 @@ namespace IcwUnits
         public bool DoDamage()
         {            
             thisUnit.CurrentStats.TurnPoints -= AttackCost;
-            thisUnit.battle.Presenter.ShowText($"{thisUnit} атакует на {this.Damage}");
+            thisUnit.Battle.Presenter.ShowText($"{thisUnit} атакует на {this.Damage}");
             return true;
         }
     }

@@ -161,7 +161,7 @@ namespace IcwField
 
             foreach (Vector2Int v in area)
             {
-                if (weigths[result.x, result.y].CompareTo(weigths[v.x, v.y]) < 0)
+                if (weigths[result.x, result.y].CompareTo(weigths[v.x, v.y]) > 0)
                     result = v;
             }
             return result;

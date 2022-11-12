@@ -13,6 +13,7 @@ namespace IcwUnits
         {
             base.Awake();
             (this as IUnit).AttackAbility.AttackCost = 3;
+            (this as IUnit).AttackAbility.Damage = 10;
             (this as IUnit).BaseStats.TurnPoints = Random.Range(20, 28);
             UnitName = $"Эвок";
         }
@@ -28,13 +29,12 @@ namespace IcwUnits
 
         IEnumerator VisualiseAttack(Vector3 targetPosition)
         {
+            RaiseVisualActionStart(this);
+            IsBusyByVisual = true;
 
             Vector3 direction = (targetPosition - this.transform.position).normalized;
-            float angle = Vector3.SignedAngle(Vector3.left, direction, Vector3.forward);
-            float screenMoveBulletSpeed = 10f;
+            float screenMoveBulletSpeed = 5f;
 
-            (this as IUnit).battle.UnitActionStart(this);
-            IsBusyByVisual = true;
             int numiteration = 0;
             while (mainsprite.transform.position != targetPosition && numiteration < 1000)
             {
@@ -44,7 +44,7 @@ namespace IcwUnits
                     mainsprite.transform.position = targetPosition;
                 yield return null;
             }
-            if (numiteration >= 1000) Debug.LogError($"Cycling in Attack Visualisation for {this}");
+            if (numiteration >= 1000) Debug.LogError($"Cycling in Attack Visualisation for {(this as IUnit).UnitName} \n target {targetPosition}");
             targetPosition = this.transform.position;
             while (mainsprite.transform.position != targetPosition && numiteration < 1000)
             {
@@ -55,8 +55,8 @@ namespace IcwUnits
                 yield return null;
             }
             if (numiteration >= 1000) Debug.LogError($"Cycling in Attack Visualisation for {this}");
+            RaiseVisualActionEnd(this);
             IsBusyByVisual = false;
-            (this as IUnit).battle.UnitActionComplete(this);
         }
 
         public override Vector2Int? DoAttack(Vector2Int pos)

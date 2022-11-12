@@ -20,19 +20,7 @@ namespace IcwUI
         private IUnit pointedUnit;
         public IcwTileDrawer drawer { get; set; }
         bool IPresenter.NeedUpdate { get; set; } = true;
-        IUnit IPresenter.SelectedUnit 
-        {
-            get 
-            {
-                if (battle.SelectedObject is IUnit) return battle.SelectedObject as IUnit;
-                else return null;
-            }
-            set 
-            {   
-                (this as IPresenter).NeedUpdate = (this as IPresenter).NeedUpdate || battle.SelectedObject != value;
-                battle.SelectedObject = value;
-            } 
-        }
+        private IUnit activeUnit;
         IUnit IPresenter.PointedUnit
         { 
             get => pointedUnit;
@@ -41,6 +29,14 @@ namespace IcwUI
                 (this as IPresenter).NeedUpdate = (this as IPresenter).NeedUpdate || pointedUnit != value;
                 pointedUnit = value;
             }
+        }
+
+        void ActiveUnitStatsChanged(object obj)
+        {
+            if (!(obj is IUnit unit)) return;
+            unit.weights = null;
+            unit.Route = null;
+            (this as IPresenter).NeedUpdate = true;
         }
 
         void IPresenter.ShowText(string str)
@@ -58,20 +54,22 @@ namespace IcwUI
             info[InfoWindowNumber].text = (InfoWindowNumber == 0 ? "ActiveUnit\n": "Pointed Unit\n") + str;
         }
 
-        
-
         void IPresenter.OnMouseMove(Vector2Int pos)
         {
             if (!field.IsValidTileCoord(pos)) return;
-            if ((this as IPresenter).SelectedUnit is IUnit unit)
+            if (activeUnit is IUnit)
             {
-                if (!unit.IsAvailable() || pos == (this as IPresenter).SelectedUnit.FieldPosition) return;
-                if (unit.weights == null)
-                    unit.weights = unit.WeightMapGenerator.GetWeightMap(unit);
-                unit.Route = unit.WeightMapGenerator.GetPath(unit, pos, unit.weights);
-                // перенести показ маршрута в презентор 
-                // unit.Field.ShowRoute(unit.Route, unit.weights);
-                //((this as IPresenter).SelectedObject as IUnit).OnMouseMove(pos);
+                if (!activeUnit.IsAvailable() || pos == activeUnit.FieldPosition) return;
+                if (activeUnit.weights == null)
+                    activeUnit.weights = activeUnit.WeightMapGenerator.GetWeightMap(activeUnit);
+                activeUnit.Route = activeUnit.WeightMapGenerator.GetPath(activeUnit, pos, activeUnit.weights);
+                (this as IPresenter).NeedUpdate = true;
+            }
+
+            IUnit unitUnderMouse = (IUnit)field.battlefield[pos.x, pos.y].Find(o => o.ObjectType.FieldObjectTypeName == "Unit");
+            if (unitUnderMouse != pointedUnit)
+            {
+                pointedUnit = unitUnderMouse;
                 (this as IPresenter).NeedUpdate = true;
             }
         }
@@ -99,21 +97,41 @@ namespace IcwUI
         private void Update()
         {
             if (!(this as IPresenter).NeedUpdate) return;
-            if ((this as IPresenter).SelectedUnit is IUnit)
+            if (battle.SelectedObject != activeUnit)
             {
-                IUnit unit = (this as IPresenter).SelectedUnit;
-                //drawer.ShowTurnArea(unit.weights);
-                if (unit.IsAvailable())
-                    drawer.ShowRoute(unit.Route, unit.weights);
-                (this as IPresenter).ShowInfo(unit.GetInfo(), 0);
+                if (activeUnit is IUnit)
+                    activeUnit.VisualActionEnd -= ActiveUnitStatsChanged;
+                if (battle.SelectedObject is IUnit)
+                {
+                    activeUnit = battle.SelectedObject as IUnit;
+                    activeUnit.VisualActionEnd += ActiveUnitStatsChanged;
+                }
+                else
+                    activeUnit = null;
+            }
+            if (activeUnit is IUnit)
+            {
+                if (activeUnit.weights == null)
+                    activeUnit.weights = activeUnit.WeightMapGenerator.GetWeightMap(activeUnit);
+
+                if (activeUnit.IsAvailable())
+                {
+                    if (activeUnit.Route != null)
+                        drawer.ShowRoute(activeUnit.Route, activeUnit.weights);
+                    else
+                        drawer.ShowTurnArea(activeUnit.weights);
+                }
+                (this as IPresenter).ShowInfo(activeUnit.GetInfo(), 0);
             }
             else
             {
-                //field.ShowTurnArea(null);
                 drawer.ClearTiles();
                 (this as IPresenter).ShowInfo("", 0);
             }
-            if (pointedUnit!=null)
+
+
+
+            if (pointedUnit is IUnit)
                 (this as IPresenter).ShowInfo(pointedUnit.GetInfo(), 1);
             else 
                 (this as IPresenter).ShowInfo("", 1);

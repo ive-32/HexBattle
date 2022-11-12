@@ -21,7 +21,7 @@ namespace IcwField
         List<Vector2Int> GetAreaInRange(Vector2Int pos, int range);
         public List<Vector2Int> GetTilesOnLine(Vector2Int startTile, Vector2Int targetTile);
         bool IsTileVisibleFrom(Vector2Int startTile, Vector2Int targetTile, out List<Vector2Int> visibletiles);
-        Vector2Int? GetFirstObstacleTile(Vector2Int startTile, Vector2Int targetTile);
+        Vector2Int? GetFirstObstacleTile(Vector2Int startTile, Vector2Int targetTile, bool ObstacleMove, bool ObstacleVisible);
         List<Vector2Int> GetVisibleTiles(Vector2Int pos, int range);
         
         

@@ -19,39 +19,11 @@ namespace IcwField
         public GameObject AreaTileMapObject;
         public Tilemap MainTileMap;
         public Tilemap AreaTileMap;
-        public GameObject TextPrefab; // для отладки
-        public GameObject DebugLayer; // для отладки
         public TileBase[] TileBorder;
-        List<GameObject> unitObjects = new();
 
-        public void CreateMap()
-        {
-            // здесь генерим карту - если генерация сложная то отдельный класс MapGenerator
-            // с интерфейсом который примет IBattleObject[,] battlefield { get; set; }
-            // и параметры карты - болотистая, скалистая, ровная и т.п.
-            // если простой то процедура
-            // пока пустой - карту сделал руками для тестов
-            for (int x = 0; x < SizeX; x++)
-            {
-                for (int y = 0; y < SizeY; y++)
-                {
-                    battlefield[x, y] = new List<IFieldObject>();
-                    IFieldObject newobj = new IcwBaseFieldObject();
-                    TileBase tb = MainTileMap.GetTile(new Vector3Int(x, y, 0));
-                    if (tb == null)
-                    {
-                        (this as IField).AddObject(newobj, new Vector2Int(x, y));
-                        continue;
-                    }                    
-                }
-            }
-
-        }
 
         private void Awake()
         {
-            
-
             AreaTileMapObject.TryGetComponent<Tilemap>(out AreaTileMap);
             if (IcwAtomFunc.IsNull(AreaTileMap, this.name))
             {
@@ -59,8 +31,6 @@ namespace IcwField
                 return;
             }
             battlefield = new List<IFieldObject>[SizeX, SizeY];
-            //CreateMap();
-            
         }
 
         void IField.RemoveObject(IFieldObject obj)
@@ -69,7 +39,6 @@ namespace IcwField
                 for (int y = 0; y < SizeY; y++)
                     if ((this as IField).battlefield[x, y].Contains(obj))
                         (this as IField).battlefield[x, y].Remove(obj);
-            (obj as IFieldObject).FieldPosition = new Vector2Int(-1, -1);
         }
 
         void IField.AddObject(IFieldObject obj, Vector2Int pos)
@@ -78,13 +47,12 @@ namespace IcwField
             if (!(this as IField).battlefield[pos.x, pos.y].Contains(obj))
                 (this as IField).battlefield[pos.x, pos.y].Add(obj);
             (obj as IFieldObject).FieldPosition = pos;
+            (obj as IFieldObject).Field = this;
         }
 
         void IField.MoveObject(IFieldObject obj, Vector2Int newpos)
         {
             if (!(this as IField).IsValidTileCoord(newpos)) return;
-            // если это не GameObject то и двигать нечего
-            // пока двигаем только юниты! если будет иное то дописать логику в AddObject
             (this as IField).RemoveObject(obj);
             (this as IField).AddObject(obj, newpos);
         }
@@ -160,7 +128,7 @@ namespace IcwField
             }
             return true;
         }
-        Vector2Int? IField.GetFirstObstacleTile(Vector2Int startTile, Vector2Int targetTile)
+        Vector2Int? IField.GetFirstObstacleTile(Vector2Int startTile, Vector2Int targetTile, bool ObstacleMove, bool ObstacleVisible)
         {
             Vector3Int startCube = IcwHexTile.OrthoToCube(startTile);
             Vector3Int targetCube = IcwHexTile.OrthoToCube(targetTile);
@@ -170,7 +138,8 @@ namespace IcwField
             {
                 Vector3 currPoint = Vector3.Lerp(startCube, targetCube, (float)i / dist);
                 Vector2Int resTile = IcwHexTile.RoundCubeToOrhto(currPoint);
-                if (battlefield[resTile.x, resTile.y].Exists(o => o.ObjectType.IsViewObstacle))
+                if ((battlefield[resTile.x, resTile.y].Exists(o => o.ObjectType.IsViewObstacle && ObstacleVisible)) ||
+                    (battlefield[resTile.x, resTile.y].Exists(o => o.ObjectType.IsMoveObstacle && ObstacleMove)))
                     return resTile;
             }
             return null;
@@ -236,50 +205,6 @@ namespace IcwField
 
        
         
-        /*void IField.ShowBorderTile(Vector2Int tile1, int? tiletype)
-        {
-            if (tiletype < 0) tiletype = 0;
-            if (tiletype >= TileBorder.Length) tiletype = TileBorder.Length - 1;
-            if (tiletype != null)
-                AreaTileMap.SetTile(new Vector3Int(tile1.x, tile1.y, 0), TileBorder[(int)tiletype]);
-            else
-                AreaTileMap.SetTile(new Vector3Int(tile1.x, tile1.y, 0), null);
-        }
-
-        /*void IField.ShowCoordTile(bool show)
-        {
-            (this as IField).HideAllInfo();
-
-
-            for (int x = 0; x < SizeX; x++)
-                for (int y = 0; y < SizeY; y++)
-                {
-                    if (show)
-                    {
-                        AreaTileMap.SetTile(new Vector3Int(x, y, 0), TileBorder[3]);
-                        GameObject gm = Instantiate(TextPrefab, (this as IField).GetWorldCoord(new Vector2Int(x, y)), Quaternion.identity, DebugLayer.transform);
-                        gm.TryGetComponent<TextMeshProUGUI>(out TextMeshProUGUI tmpro);
-                        if (IcwAtomFunc.IsNull(tmpro, this.name))
-                        {
-                            Destroy(gm);
-                            return;
-                        }
-                        tmpro.text = $"{x} - {y}";
-                    }
-                    else
-                        AreaTileMap.SetTile(new Vector3Int(x, y, 0), null);
-                }
-        }
-
-       
-        void IField.HideAllInfo()
-        {
-            foreach (Transform child in DebugLayer.transform)
-                GameObject.Destroy(child.gameObject);
-            for (int x = 0; x < SizeX; x++)
-                for (int y = 0; y < SizeY; y++)
-                    AreaTileMap.SetTile(new Vector3Int(x, y, 0), null);
-        }*/
 
     }
 

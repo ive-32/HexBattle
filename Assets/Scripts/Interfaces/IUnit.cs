@@ -9,7 +9,7 @@ namespace IcwUnits
     {
         int team { get; set; }
         string UnitName { get; set; }
-        IcwBattle.IBattle battle { get; set; }
+        IcwBattle.IBattle Battle { get; set; }
         IcwUnitStats CurrentStats { get; set; }
         IcwUnitStats BaseStats { get; set; }
         IcwStepWeigth[,] weights { get; set; }
@@ -20,10 +20,13 @@ namespace IcwUnits
         string GetInfo();
         int CostTile(List<IFieldObject> tileObjects);
         int DefaultCost(IcwFieldObjectType objType) => objType.IsMoveObstacle ? IFieldObject.MaxStepCost : IFieldObject.BaseStepCost;
-        bool OnSelect();
-        //void OnMouseMove(Vector2Int pos);*/
         bool MoveByRoute(Vector2Int pos);
-        void NewTurn();
         Vector2Int? DoAttack(Vector2Int target);
+
+        delegate void UnitEvent(object unit);
+        event UnitEvent VisualActionStart;
+        event UnitEvent VisualActionEnd;
+        event UnitEvent UnitDead;
+
     }
 }

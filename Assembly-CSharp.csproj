@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\Units\IcwTrooperUnit.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IFieldObject.cs" />
     <Compile Include="Assets\Scripts\Interfaces\IUnit.cs" />
+    <Compile Include="Assets\Scripts\Units\IcwDeadUnit.cs" />
     <Compile Include="Assets\Scripts\Units\IcwR2D2Unit.cs" />
     <Compile Include="Assets\Scripts\UI\IcwTileDrawer.cs" />
     <Compile Include="Assets\Scripts\AI\IcwTeamAI.cs" />

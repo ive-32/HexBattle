@@ -23,8 +23,6 @@ namespace IcwUI
             InfoTileMap.transform.position = Field.GetWorldCoord(Vector2Int.zero);
             TilesText = new GameObject[Field.Size.x, Field.Size.y];
             FieldTextlayer = new GameObject("FieldTextLayer");
-            //FieldTextlayer = GameObject.Instantiate(gm) as GameObject;
-            //FieldTextlayer.name = "FieldTextLayer";
         }
 
         public void ShowTextForTile(Vector2Int pos, string atext)
@@ -67,7 +65,7 @@ namespace IcwUI
                     if (weights[x, y] == null) continue;
                     if (weights[x, y].turn == IFieldObject.MaxStepCost || weights[x, y].cost == IFieldObject.MaxStepCost) continue;
                     if (IcwGlobalSettings.ShowStepCosts) ShowTextForTile(new Vector2Int(x, y), $"t {weights[x, y].turn} \n tp {weights[x, y].cost}");
-                    if (weights[x, y].turn == 1) InfoTileMap.SetTile(new Vector3Int(x, y, 0), TilePrefabs[0]);
+                    if (weights[x, y].turn == 1) InfoTileMap.SetTile(new Vector3Int(x, y, 0), TilePrefabs[3]);
                     else InfoTileMap.SetTile(new Vector3Int(x, y, 0) , null);
                 }
         }

@@ -3,7 +3,6 @@ using UnityEngine;
 using TMPro;
 using IcwBattle;
 using IcwField;
-using IcwUnits;
 
 namespace IcwUI
 {
@@ -65,16 +64,7 @@ namespace IcwUI
             {
                 currentTile = field.GetTileCoord(mousepos);
                 presenter.OnMouseMove(currentTile);
-                
             }
-
-            // обновляем инфо
-            if (field.IsValidTileCoord(currentTile))
-            {
-                IFieldObject underMouseUnit = field.battlefield[currentTile.x, currentTile.y].Find(o => o.ObjectType.FieldObjectTypeName == "Unit");
-                presenter.PointedUnit = (IUnit)underMouseUnit;
-                
-            } 
         }
 
         public void ToggleShowCost()
@@ -85,7 +75,7 @@ namespace IcwUI
 
         public void EndTurn()
         {
-            battle.DoNextTurn();
+            battle.DoNextTurn(null);
             presenter.NeedUpdate = true;
         }
 

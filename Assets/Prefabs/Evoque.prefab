@@ -50,7 +50,9 @@ MonoBehaviour:
   teamcolor:
   - {fileID: 0}
   - {fileID: 0}
-  objtype: {fileID: 11400000, guid: 0da359ead8183324fbf5014c9e882c29, type: 2}
+  UnitFieldObjectType: {fileID: 11400000, guid: 0da359ead8183324fbf5014c9e882c29, type: 2}
+  DeadUnitFieldObjectType: {fileID: 11400000, guid: fa28108684a063c439f701b890b22b5b, type: 2}
+  DeadUnitPrefab: {fileID: 6717057539385233719, guid: 61c979281c75da845af1a12f40dc0084, type: 3}
   mainsprite: {fileID: 756143409194552549}
 --- !u!1 &756143409194552549
 GameObject:

@@ -17,16 +17,26 @@ namespace IcwBattle
         public Tilemap MainTileMap; // for test - now map generated from predefined tilemap
         public GameObject UnitLayer;
         public IField field;
+        public GameObject TextPerlin;
+        public event IBattle.BattleFlowEvent OnNewRound;
+
+
         private IPresenter presenter = null;
         private int teamTurn = 1;
-        private bool isBusy = false;
+        private List<object> ActiveObjects = new List<object>();
+        private bool isBusy { get => ActiveObjects.Count > 0; }
         private BattleFlowState state = BattleFlowState.BeforeTurn;
         private ITeamAI ai;
+        private int BaseTurnCountOnRound;
+        private int CurrentTurnCountOnRound;
+
 
         public IFieldObject SelectedObject { get; set; } = null;
         IPresenter IBattle.Presenter { get => presenter; set => presenter = value; } 
         private IcwWeightMapGenerator WeightMapGenerator = new();
 
+
+        
         private void Awake()
         {
             this.TryGetComponent<IField>(out field); // по другому в Unity не умею интерфесы привязывать. но не нравится метод
@@ -36,24 +46,35 @@ namespace IcwBattle
             if (IcwAtomFunc.IsNull(presenter, this.name))
                 Destroy(this.gameObject);
 
-            this.TryGetComponent<ITeamAI>(out ai);
-            if (IcwAtomFunc.IsNull(ai, this.name))
-                Destroy(this.gameObject);
             
+            ai = new IcwTeamAI();
             ai.Battle = this;
             ai.Field = field;
             ai.Presenter = presenter;
+            ai.OnAIActionStart += OnVisualStart;
+            ai.OnAIActionEnd += OnVisualEnd;
 
+            //GenerateByPerlin();
         }
 
         private void Start()
         {
             //ai = new IcwTeamAI();
             
+
             IcwBattleFieldGenerator bg = new();
-            bg.CreateMap(field, MainTileMap, listOfObjTypes);
+            SpriteRenderer sr = TextPerlin.GetComponent<SpriteRenderer>();
+            Texture2D tex = bg.CreateByPerlin(field, MainTileMap, listOfObjTypes);
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero, tex.width);
+            // bg.CreateMap(field, MainTileMap, listOfObjTypes);
+            presenter.ShowText("BF: Создали карту");
             SetUnits();
-            (this as IBattle).DoNextRound();
+            presenter.ShowText("BF: Расставили юнитов");
+            BaseTurnCountOnRound = Mathf.CeilToInt(UnitLayer.transform.childCount / 2.0f);
+            presenter.ShowText($"BF: Количество ходов за круг для каждой команды {BaseTurnCountOnRound}");
+            CurrentTurnCountOnRound = BaseTurnCountOnRound * 2; // сразу запускаем первый раунд
+            (this as IBattle).DoNextTurn(null);
+
         }
 
         public void SetUnits()
@@ -72,7 +93,6 @@ namespace IcwBattle
                 };
 
             for (int i = 0; i < 6; i++)
-            //for (int i = 0; i < 2; i++)
             {
                 GameObject newUnitObject = Instantiate(UnitPrefabs[Random.Range(0, UnitPrefabs.Length)], UnitLayer.transform);
                 newUnitObject.TryGetComponent<IUnit>(out IUnit unit);
@@ -80,54 +100,42 @@ namespace IcwBattle
                 (unit as IFieldObject).Field = field;
                 (unit as IFieldObject).Field.AddObject((unit as IFieldObject), startTemplate[i]);
                 (unit as IUnit).WeightMapGenerator = WeightMapGenerator;
-                (unit as IUnit).battle = this;
+                (unit as IUnit).Battle = this;
                 (unit as IUnit).UnitName = $"{(unit.team == 0 ? "Красный " : "Зеленый ")} {(unit as IUnit).UnitName} {Names[i]}";
-                if (unit.team % 2 == 0)
-                    ai.Enemies.Add(unit as IUnit);
-                else
-                    ai.TeamMates.Add(unit as IUnit);
+                (unit as IUnit).VisualActionStart += OnVisualStart;
+                (unit as IUnit).VisualActionEnd += OnVisualEnd;
+                ai.AddUnit(unit as IUnit, unit.team % 2 == 0 ? ITeamAI.AITeamType.Enemies : ITeamAI.AITeamType.Mates);
             }
         }
 
-        void IBattle.UnitActionStart(IcwUnits.IUnit unit)
+        void OnVisualStart(object unit)
         {
-            // позже придется превратить в лист - несколько объктов дают визуал - добавляем их
-            // когда заканчивают убираем - 
-            // игровая логика включается только тогда когда нет ни одного объекта в листе визуала
-            isBusy = true;
+            ActiveObjects.Add(unit);
         }
 
-        void IBattle.UnitActionComplete(IcwUnits.IUnit unit)
+        void OnVisualEnd(object unit)
         {
-            isBusy = false;
-            /*if (unit.CurrentStats.TurnPoints <= 0)
-            {
-                SelectedObject = null;
-                presenter.ShowText("ОД закончились. Передаем ход другой команде");
-                (this as IBattle).DoNextTurn();
-            }*/
+            if (!ActiveObjects.Contains(unit))
+                throw new System.Exception($"unit {unit} wasn't active but send Iam inactive");
+            ActiveObjects.Remove(unit);
         }
+
 
         IUnit DoSelectUnit(Vector2Int pos)
         {
-            IUnit fieldObject = (IUnit)field.battlefield[pos.x, pos.y].Find(o => o is IUnit);// .ObjectType.FieldObjectTypeName == "Unit");
+            IUnit unit = (IUnit)field.battlefield[pos.x, pos.y].Find(o => o is IUnit);// .ObjectType.FieldObjectTypeName == "Unit");
 
-            // выбрали новый(другой) юнит, отправляем ему событие "тывыделен"
             if (state == BattleFlowState.BeforeTurn &&
-                fieldObject != null &&
-                fieldObject.team == teamTurn)
+                unit != null &&
+                unit.team == teamTurn)
             {
-                if (SelectedObject != fieldObject)
-                {
-                    if (!fieldObject.OnSelect())
-                        fieldObject = null;
-                }
-                else // выбрали тот же юнит - снимаем выделение с него
-                    fieldObject = null;
-                SelectedObject = fieldObject;
+                // выбрали тот же юнит, или юнит занят в визуале - снимаем выделение с него
+                if (SelectedObject == unit || !unit.IsAvailable())
+                    unit = null;
+                SelectedObject = unit;
                 presenter.NeedUpdate = true;
             }
-            return fieldObject;
+            return unit;
         }
 
         void IBattle.OnClick(Vector2Int pos)
@@ -147,7 +155,7 @@ namespace IcwBattle
             {
                 bool success = currUnit.MoveByRoute(pos);
                 if (success) state = BattleFlowState.InTurn;
-                presenter.drawer.ClearTiles();
+                //presenter.drawer.ClearTiles();
                 presenter.NeedUpdate = true;
                 return;
             }
@@ -155,13 +163,12 @@ namespace IcwBattle
             // вариант юнит был выбран и ткнули в чужой юнит атакуем
             if (SelectedObject is IUnit selectedunit&&
                 ((clickedUnit != null &&
-                selectedunit.team != clickedUnit.team)
-                || 
+                selectedunit.team != clickedUnit.team) || 
                 (this as IBattle).PlayerActionMode == IBattle.BattleFlowActionMode.AttackMode))
             {
                 Vector2Int? result = selectedunit.DoAttack(pos); 
                 if (result != null) state = BattleFlowState.InTurn;
-                presenter.drawer.ClearTiles();
+                //presenter.drawer.ClearTiles();
                 presenter.NeedUpdate = true;
                 return;
             }
@@ -171,40 +178,36 @@ namespace IcwBattle
         void IBattle.DoNextRound()
         {
             if (isBusy) return;
-            presenter.ShowText("--- Следующий раунд ---");
-            presenter.ShowText("--- TP одновлены для всех юнитов ---");
+            presenter.ShowText("BF: ----------- Раунд ----------------");
+            presenter.ShowText("BF: --- TP одновлены для всех юнитов ---");
             SelectedObject = null;
-            Vector2Int fieldSize = field.Size;
-            for (int x = 0; x < fieldSize.x; x++)
-                for (int y = 0; y < fieldSize.y; y++)
-                {
-                    IFieldObject unit = field.battlefield[x, y].Find(o => o.ObjectType.FieldObjectTypeName == "Unit");
-                    if (!(unit is IUnit)) continue;
-                    (unit as IUnit).NewTurn();
-                }
+            CurrentTurnCountOnRound = 1;
             teamTurn = 1;
-            ai.DoNewRound();
-            (this as IBattle).DoNextTurn();
+            OnNewRound?.Invoke();
         }
 
-        void IBattle.DoNextTurn()
+        void IBattle.DoNextTurn(object acaller)
         {
-            string[] teamnames = { "красные", "зеленые" };
-            //if (isBusy) return;
+
+            CurrentTurnCountOnRound++;
+            if (CurrentTurnCountOnRound > BaseTurnCountOnRound * 2)
+                (this as IBattle).DoNextRound();
+            if (CurrentTurnCountOnRound > 6)
+                throw new System.Exception($"Turn 7 not switch the round {isBusy}");
+            presenter.ShowText($"BF: Ход в раунде {CurrentTurnCountOnRound} ");
+
             teamTurn++;
             teamTurn %= 2;
-            presenter.ShowText($"--- Ход команды {teamnames[teamTurn % 2]}");
+            
+            presenter.ShowText($"BF: Ход {(CurrentTurnCountOnRound + 1)/ 2} команды {(teamTurn % 2 == 0 ? "красные" : "зеленые")}");
             SelectedObject = null;
             if (teamTurn % 2 == 1)
             {
-                isBusy = true;
                 ai.DoOneTurn();
                 return;
             }
-            else
-            isBusy = false;
 
-            presenter.ShowText("Выбирайте любого юнита для хода");
+            presenter.ShowText("BF: Выбирайте любого юнита для хода");
             presenter.NeedUpdate = true;
             state = BattleFlowState.BeforeTurn;
         }
